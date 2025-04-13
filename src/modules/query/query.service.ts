@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SourcesService } from '../../libs/sources/sources.service';
-import { DMHYSearchContent } from '../../libs/types/query/query.body';
+import { DMHYSearchContent } from '../../libs/modal/query/query.body';
 import { QueryResponseDto } from './dto/query.response.dto';
 import { HttpStatusCode } from 'axios';
 import { fetchCalenderAPI } from '../../libs/utils/bangumi-api/fetchCalender';

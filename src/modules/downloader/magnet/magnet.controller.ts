@@ -2,7 +2,7 @@ import { Body, Controller, Post, Res } from '@nestjs/common';
 import { MagnetService } from './magnet.service';
 import { AddParamDTO } from './dto/magnet.add.dto';
 import { Response } from 'express';
-import { MagnetFileDetails } from '../../../libs/types/magnet/file';
+import { MagnetSubmitDto } from './dto/magnet.submit.dto';
 
 @Controller('magnet')
 export class MagnetController {
@@ -19,7 +19,7 @@ export class MagnetController {
 
   @Post('submit')
   async submitNewTask(
-    @Body() data: MagnetFileDetails,
+    @Body() data: MagnetSubmitDto,
     @Res() res: Response,
   ): Promise<void> {
     const response = await this.magnetService.submitNewTask(data);

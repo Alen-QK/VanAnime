@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import * as fs from 'fs';
-import { MagnetFile } from '../../../types/magnet/file';
+import { MagnetFile } from '../../../modal/magnet/file';
 import * as process from 'node:process';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
-import { LogService } from '../../../log/log.service';
+import { LogService } from '../../../core/log/log.service';
 import { WebTorrentParseException } from '../../../exceptions/magnet/WebTorrentParseException';
+import { TORRENT_FILE_PATH } from '../../../constants/path/core';
 
 @Injectable()
 export class TorrentTransformerService {
@@ -40,7 +41,7 @@ export class TorrentTransformerService {
           fs.writeFileSync(
             path.join(
               process.cwd(),
-              `${this.configService.get<string>('TORRENT_FILE_PATH')}/${torrent.name}.torrent`,
+              `${TORRENT_FILE_PATH}/${torrent.name}.torrent`,
             ),
             torrent.torrentFile,
           );
@@ -55,7 +56,8 @@ export class TorrentTransformerService {
         });
       } catch (error) {
         this.logService.error(
-          `❌ Webtorrent 解析文件失败，错误信息为: ${(error as Error).message}`,
+          `[ERROR] Webtorrent 解析文件失败，错误信息为: ${(error as Error).message}`,
+          (error as Error).stack,
         );
         throw new WebTorrentParseException((error as Error).message);
       }

@@ -2,16 +2,12 @@ import { Body, Controller, Post, Res } from '@nestjs/common';
 import { QueryService } from './query.service';
 import { Response } from 'express';
 import { SearchParamDTO } from './dto/query.search.dto';
-import { LogService } from '../../libs/log/log.service';
 import { QueryBangumiCheckDto } from './dto/query.bangumi-check.dto';
 import { HttpStatusCode } from 'axios';
 
 @Controller('query')
 export class QueryController {
-  constructor(
-    private readonly queryService: QueryService,
-    private readonly logger: LogService,
-  ) {}
+  constructor(private readonly queryService: QueryService) {}
 
   @Post()
   async queryFromSource(

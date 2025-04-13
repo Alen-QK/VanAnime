@@ -1,5 +1,5 @@
 import { ResponseBase } from '../../../libs/dto/response-base.dto';
-import { SearchResult } from '../../../libs/types/query/query.search-result';
+import { SearchResult } from '../../../libs/modal/query/query.search-result';
 import { ApiProperty } from '@nestjs/swagger';
 import { HttpStatusCode } from 'axios';
 

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { BangumiCalenderAPIResponse } from '../../types/query/bangumi-calender';
+import { BangumiCalenderAPIResponse } from '../../modal/query/bangumi-calender';
 
 export async function fetchCalenderAPI(): Promise<string[]> {
   const response: AxiosResponse<BangumiCalenderAPIResponse> = await axios.get(

@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { LogService } from './libs/log/log.service';
-import { GlobalExceptionFilter } from './libs/filter/GlobalExceptionFilter';
+import { LogService } from './libs/core/log/log.service';
+import { GlobalExceptionFilter } from './libs/core/filter/GlobalExceptionFilter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {

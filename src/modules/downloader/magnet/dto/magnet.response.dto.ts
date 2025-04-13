@@ -1,5 +1,5 @@
 import { ResponseBase } from '../../../../libs/dto/response-base.dto';
-import { MagnetFileDetails } from '../../../../libs/types/magnet/file';
+import { MagnetFileDetails } from '../../../../libs/modal/magnet/file';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MagnetParseResponseDto extends ResponseBase {
