@@ -1,7 +1,6 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { LogService } from '../log/log.service';
 import { StoreTaskRecord } from '../../modal/store/StoreTaskRecord';
-import { TaskStore } from './TaskStore';
 import { FileService } from '../file/file.service';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -12,7 +11,7 @@ import { MagnetFile } from '../../modal/magnet/file';
 @Injectable()
 export class StoreService implements OnApplicationBootstrap {
   private readonly storeJsonPath: string;
-  private taskStore: TaskStore;
+  private taskStore: StoreTaskRecord[];
 
   constructor(
     private readonly logService: LogService,
@@ -39,10 +38,10 @@ export class StoreService implements OnApplicationBootstrap {
       selectedContents,
     };
 
-    this.taskStore.addNewRecord(newTaskRecord);
+    this.taskStore.push(newTaskRecord);
     fs.writeFile(
       path.join(process.cwd(), this.storeJsonPath),
-      JSON.stringify(this.taskStore.getTaskStore(), null, 2),
+      JSON.stringify(this.taskStore, null, 2),
       { encoding: 'utf8' },
       (error) => {
         if (error) {
@@ -60,15 +59,21 @@ export class StoreService implements OnApplicationBootstrap {
   }
 
   findTask(infoHash?: string) {
-    return this.taskStore.findRecord(infoHash);
+    if (infoHash) {
+      return this.taskStore.find((record) => record.infoHash === infoHash);
+    }
+
+    // if (name) {
+    //   return this.taskStore.find((record) => record.infoHash === name);
+    // }
   }
 
-  onApplicationBootstrap(): any {
+  onApplicationBootstrap() {
     try {
       const store = this.fileService.getStoreJson(
         this.storeJsonPath,
       ) as StoreTaskRecord[];
-      this.taskStore = new TaskStore(store);
+      this.taskStore = store;
     } catch (error) {
       this.logService.error(
         `[ERROR] 解析本地store文件失败，请检查store.json对应路径`,

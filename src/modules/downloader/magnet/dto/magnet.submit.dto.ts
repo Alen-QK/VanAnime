@@ -9,16 +9,15 @@ export class MagnetSubmitDto {
       details: {
         filesList: [
           {
-            name: '[Nekomoe kissaten&VCB-Studio] Mobile Suit Gundam THE WITCH FROM MERCURY [01][Ma10p_1080p][x265_flac_aac].JPSC.ass',
-            length: 63691,
+            name: 'string',
+            length: 'number',
           },
         ],
-        torrentName:
-          '[Nekomoe kissaten&VCB-Studio] Mobile Suit Gundam THE WITCH FROM MERCURY [Ma10p_1080p]',
-        infoHash: '2cc849eb3552b6956668c6e90d7aa7c46018f4fc',
+        torrentName: 'string',
+        infoHash: 'string',
       },
-      originMagnet: 'magnet:?xt=urn:btih:FTEET2ZVKK3JKZTIY3UQ26VHYRQBR5H4',
-      source: 'dmhy',
+      originMagnet: 'string',
+      source: 'string',
     },
   })
   @IsNotEmpty()
