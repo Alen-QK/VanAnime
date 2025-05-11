@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../src/files/database/vananimedb.sqlite"
+}
+
+model Torrent {
+  id              Int    @id @default(autoincrement())
+  torrentName     String
+  magnet          String
+  infoHash        String @unique
+  filesList       Json? // object[]
+  torrentSavePath String
+  taskId          Int?   @unique
+  Task            Task?
+}
+
+model Task {
+  id               Int      @id @default(autoincrement())
+  isCompleted      Boolean  @default(false)
+  isDownloaded     Boolean  @default(false)
+  addDate          DateTime @default(now())
+  selectedContents Json? // object[]
+  customEpisodes   Json? // object[]
+  torrent          Torrent  @relation(fields: [torrentId], references: [id])
+  torrentId        Int      @unique
+}
