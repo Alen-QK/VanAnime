@@ -45,11 +45,11 @@ export class StoreService implements OnApplicationBootstrap {
       { encoding: 'utf8' },
       (error) => {
         if (error) {
-          this.logService.error('[ERROR] 更新store.json失败', error.stack);
+          this.logService.error('更新store.json失败', error.stack);
           throw error as Error;
         }
 
-        this.logService.log('[OK] 已更新store.json');
+        this.logService.log('已更新store.json');
       },
     );
   }
@@ -75,9 +75,7 @@ export class StoreService implements OnApplicationBootstrap {
       ) as StoreTaskRecord[];
       this.taskStore = store;
     } catch (error) {
-      this.logService.error(
-        `[ERROR] 解析本地store文件失败，请检查store.json对应路径`,
-      );
+      this.logService.error(`解析本地store文件失败，请检查store.json对应路径`);
       throw error as Error;
     }
   }

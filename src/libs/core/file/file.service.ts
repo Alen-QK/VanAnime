@@ -19,9 +19,9 @@ export class FileService implements OnApplicationBootstrap {
       fs.mkdirSync(path.join(process.cwd(), folderPath), {
         recursive: true,
       });
-      this.logService.log(`[OK] 目录已创建: ${folderPath}`);
+      this.logService.log(`目录已创建: ${folderPath}`);
     } else {
-      this.logService.log(`[INFO] 目录已存在: ${folderPath}`);
+      this.logService.log(`目录已存在: ${folderPath}`);
     }
   }
 
@@ -33,9 +33,9 @@ export class FileService implements OnApplicationBootstrap {
         'utf8',
       );
 
-      this.logService.log(`[OK] 文件已创建: ${filePath}`);
+      this.logService.log(`文件已创建: ${filePath}`);
     } else {
-      this.logService.log(`[INFO] 文件已存在: ${filePath}`);
+      this.logService.log(`文件已存在: ${filePath}`);
     }
   }
 
