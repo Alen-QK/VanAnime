@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LogService } from '../../core/log/log.service';
 import { QBLoginFailedException } from '../../exceptions/qb/QBLoginFailedException';
@@ -31,6 +31,7 @@ export class QbittorrentService implements OnModuleInit {
   constructor(
     private readonly configService: ConfigService,
     private readonly logService: LogService,
+    @Inject('QbittorrentService')
     private readonly apiService: ApiServiceService,
   ) {
     this.qbHost = this.configService.get<string>('QB_HOST');
