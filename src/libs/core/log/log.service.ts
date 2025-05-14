@@ -3,14 +3,27 @@ import { createLogger, format, transports } from 'winston';
 
 @Injectable()
 export class LogService implements LoggerService {
+  private generalFormat = format.printf(
+    ({
+      level,
+      message,
+      timestamp,
+    }: {
+      level: string;
+      message: string;
+      timestamp: string;
+    }) => {
+      return `[${level.toUpperCase()}] ${timestamp} ${message}`;
+    },
+  );
+
   private logger = createLogger({
     level: 'info',
-    format: format.json(),
+    format: format.combine(format.timestamp(), this.generalFormat),
     transports: [new transports.Console()],
   });
 
-  // Placeholder，这里允许任何type的logs，无固定type
-  log(message: unknown) {
+  log(message: any) {
     this.logger.info(message);
   }
 

@@ -3,6 +3,7 @@ import { QbittorrentService } from './qbittorrent.service';
 
 @Global()
 @Module({
+  imports: [],
   providers: [QbittorrentService],
   exports: [QbittorrentService],
 })

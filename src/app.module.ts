@@ -1,3 +1,4 @@
+import { ApiServiceModule } from './libs/apiAxios/apiService.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -25,6 +26,15 @@ import { StoreModule } from './libs/core/store/store.module';
     MagnetModule,
     FileModule,
     StoreModule,
+    ApiServiceModule.forFeature([
+      {
+        serviceName: 'QbittorrentService',
+        config: {
+          baseURL: process.env.QB_HOST,
+          enableLogs: true,
+        },
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService, LogService],
