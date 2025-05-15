@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { LogService } from '../../../core/log/log.service';
 import { WebTorrentParseException } from '../../../exceptions/magnet/WebTorrentParseException';
 import { TORRENT_FILE_PATH } from '../../../constants/path/core';
+import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Injectable()
 export class TorrentTransformerService {
@@ -19,6 +20,9 @@ export class TorrentTransformerService {
     'http://tracker4.itzmx.com:2710/announce',
     'http://tracker.publicbt.com:80/announce',
   ];
+  private readonly ctx: Ctx = {
+    serviceContext: 'TorrentTransformerService',
+  };
 
   constructor(
     @Inject('package:webtorrent')
@@ -28,6 +32,7 @@ export class TorrentTransformerService {
   ) {}
 
   parseMagnet(magnet: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'parseMagnet' };
     return new Promise((resolve) => {
       const client = new this.Webtorrent();
 
@@ -56,7 +61,8 @@ export class TorrentTransformerService {
         });
       } catch (error) {
         this.logService.error(
-          `[ERROR] Webtorrent 解析文件失败，错误信息为: ${(error as Error).message}`,
+          `Webtorrent 解析文件失败，错误信息为: ${(error as Error).message}`,
+          ctx,
           (error as Error).stack,
         );
         throw new WebTorrentParseException((error as Error).message);

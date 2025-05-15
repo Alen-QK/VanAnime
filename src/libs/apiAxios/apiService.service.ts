@@ -7,6 +7,7 @@ import axios, {
 } from 'axios';
 import { Injectable } from '@nestjs/common';
 import { LogService } from '../core/log/log.service';
+import { Ctx } from '../modal/ctx/Ctx';
 
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   enableLogs?: boolean;
@@ -15,6 +16,9 @@ export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
 @Injectable()
 export class ApiServiceService {
   private axiosInstance: AxiosInstance;
+  private readonly ctx: Ctx = {
+    serviceContext: 'ApiServiceService',
+  };
 
   constructor(
     private readonly logService: LogService,
@@ -32,27 +36,34 @@ export class ApiServiceService {
     }
   }
 
+  getLogger() {
+    return this.logService;
+  }
+
   private handleRequest = (
     config: InternalAxiosRequestConfig,
   ): InternalAxiosRequestConfig => {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'handleRequest' };
     this.logService.log(
-      `HTTP请求如下: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+      `<-- ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+      ctx,
     );
     return config;
   };
 
   private handleResponse = (response: AxiosResponse): AxiosResponse => {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'handleResponse' };
     this.logService.log(
-      `HTTP请求响应${response.status}，具体如下: ${response.config.method?.toUpperCase()} ${response.config.baseURL}${
-        response.config.url
-      }`,
+      `${response.status} --> ${response.config.method?.toUpperCase()} ${response.config.baseURL}${response.config.url}，RESPONSE <==> ${JSON.stringify(response.data, null, 2)}`,
+      ctx,
     );
     return response;
   };
 
   //客制化错误响应，但仍需回报错误 https://axios-http.com/docs/interceptors
   private handleErrorResponse = (error: AxiosError): Promise<AxiosError> => {
-    this.logService.error(`HTTP响应错误！${error.message}`);
+    const ctx: Ctx = { ...this.ctx, functionContext: 'handleErrorResponse' };
+    this.logService.error(`HTTP响应错误！${error.message}`, ctx);
     return Promise.reject(error);
   };
 
