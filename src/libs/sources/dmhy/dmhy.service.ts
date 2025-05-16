@@ -6,15 +6,21 @@ import { fetchResources } from 'animegarden';
 import { LogService } from '../../core/log/log.service';
 import { ConfigService } from '@nestjs/config';
 import { DmhyAPIException } from '../../exceptions/query/DmhyAPIException';
+import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Injectable()
 export class DmhyService implements SourceServiceInterface<DMHYSearchContent> {
+  private readonly ctx: Ctx = {
+    serviceContext: 'DmhyService',
+  };
+
   constructor(
     private readonly logService: LogService,
     private readonly configService: ConfigService,
   ) {}
 
   async search(query: DMHYSearchContent): Promise<SearchResult[]> {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'search' };
     const fetchQuery = {
       ...query,
       provider: 'dmhy',
@@ -39,7 +45,7 @@ export class DmhyService implements SourceServiceInterface<DMHYSearchContent> {
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
-        this.logService.error(error.message, error.stack);
+        this.logService.error(error.message, ctx, error.stack);
         throw new DmhyAPIException();
       } else {
         throw new Error('Unexpect Anime Garden API error occurred.');
