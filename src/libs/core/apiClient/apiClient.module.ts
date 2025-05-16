@@ -1,25 +1,25 @@
 import {
-  ApiServiceService,
+  ApiClientService,
   CustomAxiosRequestConfig,
-} from './apiService.service';
-import { LogService } from '../core/log/log.service';
+} from './apiClient.service';
+import { LogService } from '../log/log.service';
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 
 @Module({})
-export class ApiServiceModule {
+export class ApiClientModule {
   public static forRoot(config: CustomAxiosRequestConfig): DynamicModule {
     return {
-      module: ApiServiceModule,
+      module: ApiClientModule,
       providers: [
         {
-          provide: ApiServiceService,
+          provide: ApiClientService,
           inject: [LogService],
           useFactory: (logService: LogService) => {
-            return new ApiServiceService(logService, config);
+            return new ApiClientService(logService, config);
           },
         },
       ],
-      exports: [ApiServiceService],
+      exports: [ApiClientService],
     };
   }
 
@@ -30,13 +30,13 @@ export class ApiServiceModule {
   }) {
     const providerName = option.serviceName;
     return {
-      module: ApiServiceModule,
+      module: ApiClientModule,
       providers: [
         {
           provide: providerName,
           inject: [LogService],
           useFactory: (logService: LogService) => {
-            return new ApiServiceService(logService, option.config);
+            return new ApiClientService(logService, option.config);
           },
         },
       ],
@@ -54,14 +54,14 @@ export class ApiServiceModule {
           provide: providerName,
           inject: [LogService],
           useFactory: (logService: LogService) => {
-            return new ApiServiceService(logService, option.config);
+            return new ApiClientService(logService, option.config);
           },
         });
         results.exports?.push(providerName);
         return results;
       },
       {
-        module: ApiServiceModule,
+        module: ApiClientModule,
         providers: [],
         exports: [],
       },
@@ -80,14 +80,14 @@ export class ApiServiceModule {
       provide: providerName,
       inject: [LogService],
       useFactory: (logService: LogService) => {
-        return new ApiServiceService(logService, options.config);
+        return new ApiClientService(logService, options.config);
       },
     } as Provider;
     return {
       module: {
-        module: ApiServiceModule,
+        module: ApiClientModule,
         providers: [provider],
-        exports: [providerName, ApiServiceModule],
+        exports: [providerName, ApiClientModule],
       },
       provider,
     };

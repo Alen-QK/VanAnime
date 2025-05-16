@@ -6,18 +6,18 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import { Injectable } from '@nestjs/common';
-import { LogService } from '../core/log/log.service';
-import { Ctx } from '../modal/ctx/Ctx';
+import { LogService } from '../log/log.service';
+import { Ctx } from '../../modal/ctx/Ctx';
 
 export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   enableLogs?: boolean;
 }
 
 @Injectable()
-export class ApiServiceService {
+export class ApiClientService {
   private axiosInstance: AxiosInstance;
   private readonly ctx: Ctx = {
-    serviceContext: 'ApiServiceService',
+    serviceContext: 'ApiClientService',
   };
 
   constructor(

@@ -1,11 +1,11 @@
 import { Global, Module } from '@nestjs/common';
 import { QbittorrentService } from './qbittorrent.service';
-import { ApiServiceModule } from 'src/libs/apiAxios/apiService.module';
+import { ApiClientModule } from 'src/libs/core/apiClient/apiClient.module';
 
 @Global()
 @Module({
   imports: [
-    ApiServiceModule.forFeature([
+    ApiClientModule.forFeature([
       {
         serviceName: 'QbittorrentService',
         config: {

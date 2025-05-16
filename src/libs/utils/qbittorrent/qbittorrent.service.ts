@@ -17,7 +17,7 @@ import { QBresumeTaskException } from '../../exceptions/qb/QBresumeTaskException
 import { QB_V5_ENDPOINTS, QB_V5_STATES } from '../../constants/qbittorrent/v5';
 import { QB_V4_ENDPOINTS, QB_V4_STATES } from '../../constants/qbittorrent/v4';
 import { TORRENT_FILE_PATH } from '../../constants/path/core';
-import { ApiServiceService } from 'src/libs/apiAxios/apiService.service';
+import { ApiClientService } from 'src/libs/core/apiClient/apiClient.service';
 import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Injectable()
@@ -36,7 +36,7 @@ export class QbittorrentService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly logService: LogService,
     @Inject('QbittorrentService')
-    private readonly apiService: ApiServiceService,
+    private readonly apiService: ApiClientService,
   ) {
     this.qbHost = this.configService.get<string>('QB_HOST');
     this.username = this.configService.get<string>('QB_USERNAME');
