@@ -20,6 +20,7 @@ export class DmhyService implements SourceServiceInterface<DMHYSearchContent> {
   ) {}
 
   async search(query: DMHYSearchContent): Promise<SearchResult[]> {
+    // 从这里开始
     const ctx: Ctx = { ...this.ctx, functionContext: 'search' };
     const fetchQuery = {
       ...query,
