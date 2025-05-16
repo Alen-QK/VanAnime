@@ -31,7 +31,7 @@ export class DmhyService implements SourceServiceInterface<DMHYSearchContent> {
     this.logService.log(fetchQuery);
 
     try {
-      const response = await fetchResources(fetch, fetchQuery);
+      const response = await fetchResources(fetchQuery);
       const resources = response.resources;
       return resources.map((resource) => {
         return {

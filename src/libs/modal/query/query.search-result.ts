@@ -4,5 +4,5 @@ export type SearchResult = {
   href: string;
   type: string;
   magnet: string;
-  size: string;
+  size: number;
 };
