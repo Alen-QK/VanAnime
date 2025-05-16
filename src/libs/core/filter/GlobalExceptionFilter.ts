@@ -8,15 +8,18 @@ import {
 import { LogService } from '../log/log.service';
 import { Response, Request } from 'express';
 import { ExceptionResponseInterface } from '../../interfaces/exception-response.interface';
+import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new LogService();
+  private readonly logCtx: Ctx = { serviceContext: 'GlobalExceptionFilter' };
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const logCtx: Ctx = { ...this.logCtx, functionContext: 'catch' };
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal Server Error';
@@ -37,7 +40,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     this.logger.error(
-      `🚨 Error: ${message}, Status: ${status}, URL: ${request.url}, Method: ${request.method}`,
+      `Error: ${message}, Status: ${status}, URL: ${request.url}, Method: ${request.method}`,
+      logCtx,
     );
 
     response.status(status).json({

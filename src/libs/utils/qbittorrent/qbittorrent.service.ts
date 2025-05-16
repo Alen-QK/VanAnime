@@ -1,7 +1,6 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LogService } from '../../core/log/log.service';
-import axios, { AxiosInstance } from 'axios';
 import { QBLoginFailedException } from '../../exceptions/qb/QBLoginFailedException';
 import { QBaddTaskFailedException } from '../../exceptions/qb/QBaddTaskFailedException';
 import { QBtaskInfoException } from '../../exceptions/qb/QBtaskInfoException';
@@ -18,6 +17,8 @@ import { QBresumeTaskException } from '../../exceptions/qb/QBresumeTaskException
 import { QB_V5_ENDPOINTS, QB_V5_STATES } from '../../constants/qbittorrent/v5';
 import { QB_V4_ENDPOINTS, QB_V4_STATES } from '../../constants/qbittorrent/v4';
 import { TORRENT_FILE_PATH } from '../../constants/path/core';
+import { ApiClientService } from 'src/libs/core/apiClient/apiClient.service';
+import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Injectable()
 export class QbittorrentService implements OnModuleInit {
@@ -25,23 +26,22 @@ export class QbittorrentService implements OnModuleInit {
   private username: string | undefined = undefined;
   private password: string | undefined = undefined;
   private qbVersion: string | undefined = undefined;
-  private axiosInstance: AxiosInstance;
-  private cookie: string | null = null;
   private QB_ENDPOINTS: typeof QB_V5_ENDPOINTS | typeof QB_V4_ENDPOINTS;
   private QB_STATES: typeof QB_V5_STATES | typeof QB_V4_STATES;
+  private readonly ctx: Ctx = {
+    serviceContext: 'QbittorrentService',
+  };
 
   constructor(
     private readonly configService: ConfigService,
     private readonly logService: LogService,
+    @Inject('QbittorrentService')
+    private readonly apiService: ApiClientService,
   ) {
     this.qbHost = this.configService.get<string>('QB_HOST');
     this.username = this.configService.get<string>('QB_USERNAME');
     this.password = this.configService.get<string>('QB_PASSWORD');
     this.qbVersion = this.configService.get<string>('QB_VERSION') || 'v5';
-    this.axiosInstance = axios.create({
-      baseURL: this.qbHost,
-      withCredentials: true,
-    });
   }
 
   async onModuleInit() {
@@ -50,8 +50,9 @@ export class QbittorrentService implements OnModuleInit {
   }
 
   async QBlogin() {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'QBlogin' };
     try {
-      const response = await this.axiosInstance.post(
+      const response = await this.apiService.post(
         '/api/v2/auth/login',
         {
           username: this.username,
@@ -67,14 +68,18 @@ export class QbittorrentService implements OnModuleInit {
       );
 
       if (response.headers['set-cookie']) {
-        this.cookie = response.headers['set-cookie'][0];
-        this.logService.log('[OK] qBittorrent 登录成功');
+        this.apiService.setGlobalHeader(
+          'Cookie',
+          response.headers['set-cookie'][0],
+        );
+        this.logService.log('qBittorrent 登录成功', ctx);
       } else {
-        this.logService.error('[ERROR] qBittorrent 登录失败，未返回 Cookie');
+        this.logService.error('qBittorrent 登录失败，未返回 Cookie', ctx);
       }
     } catch (error) {
       this.logService.error(
-        '[ERROR] qBittorrent 连接失败, 请检查QB配置重启重试',
+        'qBittorrent 连接失败, 请检查QB配置重启重试',
+        ctx,
         (error as Error).stack,
       );
       throw new QBLoginFailedException((error as Error).message);
@@ -82,28 +87,28 @@ export class QbittorrentService implements OnModuleInit {
   }
 
   async addMagnet(magnet: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'addMagnet' };
     try {
-      const response = await this.axiosInstance.post(
+      const response = await this.apiService.post(
         '/api/v2/torrents/add',
         { urls: magnet },
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Cookie: this.cookie,
           },
         },
       );
 
       if (response.status === 200) {
-        this.logService.log('[OK] 已提交磁力链接');
+        this.logService.log('已提交磁力链接', ctx);
       } else {
-        this.logService.error('[ERROR] 磁力链接提交失败，格式可能有误');
+        this.logService.error('磁力链接提交失败，格式可能有误', ctx);
         throw new QBaddTaskFailedException(
           'QB提交API没有返回200, 磁力链接格式可能不正确',
         );
       }
     } catch (error) {
-      this.logService.error('[ERROR] QB提交API出错，提交失败');
+      this.logService.error('QB提交API出错，提交失败', ctx);
       throw new QBaddTaskFailedException((error as Error).message);
     }
   }
@@ -140,24 +145,25 @@ export class QbittorrentService implements OnModuleInit {
   // metaDL, stoppedDL, downloading,
 
   private async getTaskState(hash: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'getTaskState' };
     try {
-      const response = await this.axiosInstance.get('/api/v2/torrents/info', {
+      const response = await this.apiService.get('/api/v2/torrents/info', {
         params: {
           hashes: hash,
         },
-        headers: { Cookie: this.cookie },
       });
 
       if (response.status === 200) {
         console.log(response.data);
       }
     } catch (error) {
-      this.logService.error('[ERROR] 获取QB任务失败', (error as Error).stack);
+      this.logService.error('获取QB任务失败', ctx);
       throw new QBtaskInfoException((error as Error).message);
     }
   }
 
   private async addTorrent(torrentName: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'addTorrent' };
     const torrentPath = path.join(
       process.cwd(),
       `${TORRENT_FILE_PATH}/${torrentName}.torrent`,
@@ -168,13 +174,12 @@ export class QbittorrentService implements OnModuleInit {
     form.append(this.qbVersion === 'v5' ? 'stopped' : 'paused', 'true');
 
     try {
-      const response = await this.axiosInstance.post(
+      const response = await this.apiService.post(
         '/api/v2/torrents/add',
         form,
         {
           headers: {
             ...form.getHeaders(),
-            Cookie: this.cookie,
           },
         },
       );
@@ -182,12 +187,13 @@ export class QbittorrentService implements OnModuleInit {
       if (response.status === 200) {
         return true;
       } else {
-        this.logService.error('[ERROR] QB提交API出错，提交失败');
+        this.logService.error('QB提交API出错，提交失败', ctx);
         return false;
       }
     } catch (error) {
       this.logService.error(
-        '[ERROR] 服务器内部错误，QB提交API失败',
+        '服务器内部错误，QB提交API失败',
+        ctx,
         (error as Error).stack,
       );
       throw new QBaddTaskFailedException((error as Error).message);
@@ -195,13 +201,11 @@ export class QbittorrentService implements OnModuleInit {
   }
 
   private async getTorrentContents(hash: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'getTorrentContents' };
     try {
-      const response = await this.axiosInstance.get('/api/v2/torrents/files', {
+      const response = await this.apiService.get('/api/v2/torrents/files', {
         params: {
           hash,
-        },
-        headers: {
-          Cookie: this.cookie,
         },
       });
 
@@ -210,7 +214,8 @@ export class QbittorrentService implements OnModuleInit {
       }
     } catch (error) {
       this.logService.error(
-        '[ERROR] QB获取文件列表API出错，获取失败',
+        'QB获取文件列表API出错，获取失败',
+        ctx,
         (error as Error).stack,
       );
       throw new QBaddTaskFailedException((error as Error).message);
@@ -222,6 +227,7 @@ export class QbittorrentService implements OnModuleInit {
     filesList: MagnetFile[],
     torrentContents: QBTaskContent[],
   ) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'changeContentPriority' };
     const selectedFiles = new Set(filesList.map((file) => file.name));
     const unselected = torrentContents.filter(
       (content: { name: string }) =>
@@ -236,7 +242,7 @@ export class QbittorrentService implements OnModuleInit {
     }
 
     try {
-      const response = await this.axiosInstance.post(
+      const response = await this.apiService.post(
         `/api/v2/torrents/filePrio`,
         {
           hash,
@@ -246,7 +252,6 @@ export class QbittorrentService implements OnModuleInit {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Cookie: this.cookie,
           },
         },
       );
@@ -255,28 +260,26 @@ export class QbittorrentService implements OnModuleInit {
         return true;
       } else {
         this.logService.error(
-          `[ERROR] QB修改文件优先级失败，错误: ${response.status}`,
+          `QB修改文件优先级失败，错误: ${response.status}`,
+          ctx,
         );
         return false;
       }
     } catch (error) {
-      this.logService.error(
-        '[ERROR] QB修改文件优先级API出错，提交失败',
-        (error as Error).stack,
-      );
+      this.logService.error('QB修改文件优先级API出错，提交失败', ctx);
       throw new QBaddTaskFailedException((error as Error).message);
     }
   }
 
   private async resumeQBTask(hash: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'resumeQBTask' };
     try {
-      const response = await this.axiosInstance.post(
+      const response = await this.apiService.post(
         `/api/v2/torrents/${this.QB_ENDPOINTS.start}`,
         { hashes: hash },
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Cookie: this.cookie,
           },
         },
       );
@@ -286,15 +289,17 @@ export class QbittorrentService implements OnModuleInit {
       }
     } catch (error) {
       this.logService.error(
-        `[ERROR] QB恢复任务下载失败，错误信息: ${(error as Error).message}`,
+        `QB恢复任务下载失败，错误信息: ${(error as Error).message}`,
+        ctx,
       );
       throw new QBresumeTaskException((error as Error).message);
     }
   }
 
   private delay(ms: number) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'resumeQBTask' };
     return new Promise((resolve) => {
-      this.logService.log('[INFO] 等待QB生成任务.......');
+      this.logService.log('等待QB生成任务.......', ctx);
       setTimeout(resolve, ms);
     });
   }

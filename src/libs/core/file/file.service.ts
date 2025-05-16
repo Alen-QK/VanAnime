@@ -4,9 +4,14 @@ import * as path from 'path';
 import { LogService } from '../log/log.service';
 import * as process from 'node:process';
 import { STORE_PATH, TORRENT_FILE_PATH } from '../../constants/path/core';
+import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Injectable()
 export class FileService implements OnApplicationBootstrap {
+  private readonly ctx: Ctx = {
+    serviceContext: 'FileService',
+  };
+
   constructor(private readonly logService: LogService) {}
 
   onApplicationBootstrap() {
@@ -15,17 +20,19 @@ export class FileService implements OnApplicationBootstrap {
   }
 
   private folderInit(folderPath: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'folderInit' };
     if (!fs.existsSync(path.join(process.cwd(), folderPath))) {
       fs.mkdirSync(path.join(process.cwd(), folderPath), {
         recursive: true,
       });
-      this.logService.log(`[OK] 目录已创建: ${folderPath}`);
+      this.logService.log(`目录已创建: ${folderPath}`, ctx);
     } else {
-      this.logService.log(`[INFO] 目录已存在: ${folderPath}`);
+      this.logService.log(`目录已存在: ${folderPath}`, ctx);
     }
   }
 
   private fileInit(filePath: string) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'fileInit' };
     if (!fs.existsSync(path.join(process.cwd(), filePath))) {
       fs.writeFileSync(
         path.join(process.cwd(), filePath),
@@ -33,9 +40,9 @@ export class FileService implements OnApplicationBootstrap {
         'utf8',
       );
 
-      this.logService.log(`[OK] 文件已创建: ${filePath}`);
+      this.logService.log(`文件已创建: ${filePath}`, ctx);
     } else {
-      this.logService.log(`[INFO] 文件已存在: ${filePath}`);
+      this.logService.log(`文件已存在: ${filePath}`, ctx);
     }
   }
 

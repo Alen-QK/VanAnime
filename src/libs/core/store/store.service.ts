@@ -7,11 +7,15 @@ import * as path from 'node:path';
 import * as process from 'node:process';
 import { STORE_PATH } from '../../constants/path/core';
 import { MagnetFile } from '../../modal/magnet/file';
+import { Ctx } from 'src/libs/modal/ctx/Ctx';
 
 @Injectable()
 export class StoreService implements OnApplicationBootstrap {
   private readonly storeJsonPath: string;
   private taskStore: StoreTaskRecord[];
+  private readonly ctx: Ctx = {
+    serviceContext: 'StoreService',
+  };
 
   constructor(
     private readonly logService: LogService,
@@ -27,6 +31,7 @@ export class StoreService implements OnApplicationBootstrap {
     source: string,
     selectedContents: MagnetFile[],
   ) {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'addNewRecord' };
     const newTaskRecord: StoreTaskRecord = {
       name,
       magnet,
@@ -45,11 +50,11 @@ export class StoreService implements OnApplicationBootstrap {
       { encoding: 'utf8' },
       (error) => {
         if (error) {
-          this.logService.error('[ERROR] 更新store.json失败', error.stack);
+          this.logService.error('更新store.json失败', ctx, error.stack);
           throw error as Error;
         }
 
-        this.logService.log('[OK] 已更新store.json');
+        this.logService.log('已更新store.json', ctx);
       },
     );
   }
@@ -69,6 +74,7 @@ export class StoreService implements OnApplicationBootstrap {
   }
 
   onApplicationBootstrap() {
+    const ctx: Ctx = { ...this.ctx, functionContext: 'onApplicationBootstrap' };
     try {
       const store = this.fileService.getStoreJson(
         this.storeJsonPath,
@@ -76,7 +82,8 @@ export class StoreService implements OnApplicationBootstrap {
       this.taskStore = store;
     } catch (error) {
       this.logService.error(
-        `[ERROR] 解析本地store文件失败，请检查store.json对应路径`,
+        `解析本地store文件失败，请检查store.json对应路径`,
+        ctx,
       );
       throw error as Error;
     }
