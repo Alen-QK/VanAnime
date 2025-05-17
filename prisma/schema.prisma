@@ -27,8 +27,9 @@ model Task {
   id               Int      @id @default(autoincrement())
   isCompleted      Boolean  @default(false)
   isDownloaded     Boolean  @default(false)
-  createAt         DateTime @default(now())
   version          String
+  createAt         DateTime @default(now())
+  updateAt         DateTime
   selectedContents Json? // object[]
   customEpisodes   Json? // object[]
   torrent          Torrent  @relation(fields: [torrentId], references: [id])
