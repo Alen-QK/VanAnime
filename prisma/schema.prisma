@@ -28,6 +28,7 @@ model Task {
   isCompleted      Boolean  @default(false)
   isDownloaded     Boolean  @default(false)
   createAt         DateTime @default(now())
+  version          String
   selectedContents Json? // object[]
   customEpisodes   Json? // object[]
   torrent          Torrent  @relation(fields: [torrentId], references: [id])
