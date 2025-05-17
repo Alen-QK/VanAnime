@@ -20,15 +20,14 @@ model Torrent {
   infoHash        String @unique
   filesList       Json? // object[]
   torrentSavePath String
-  taskId          Int?   @unique
-  Task            Task?
+  task            Task?
 }
 
 model Task {
   id               Int      @id @default(autoincrement())
   isCompleted      Boolean  @default(false)
   isDownloaded     Boolean  @default(false)
-  addDate          DateTime @default(now())
+  creatAt          DateTime @default(now())
   selectedContents Json? // object[]
   customEpisodes   Json? // object[]
   torrent          Torrent  @relation(fields: [torrentId], references: [id])
