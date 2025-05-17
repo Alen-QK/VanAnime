@@ -12,6 +12,7 @@ import { QbittorrentModule } from './libs/utils/qbittorrent/qbittorrent.module';
 import { MagnetModule } from './libs/utils/magnet/magnet.module';
 import { FileModule } from './libs/core/file/file.module';
 import { StoreModule } from './libs/core/store/store.module';
+import { DBModule } from './libs/core/db/db.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StoreModule } from './libs/core/store/store.module';
     MagnetModule,
     FileModule,
     StoreModule,
+    DBModule,
   ],
   controllers: [AppController],
   providers: [AppService, LogService],
